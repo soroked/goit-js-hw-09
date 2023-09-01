@@ -44,11 +44,17 @@ function onClick(delta) {
 	refs.startBtnRef.disabled = true;
 
 	// Виконую розрахунок та відмалювання відразу після кліку...
-	onClickIntervalHelper(delta)
+	onClickIntervalHelper(delta);
 
 	const id = setInterval(() => {
-		// .. а також в інтервалі кожну секунду
-		onClickIntervalHelper(delta);
+		// .. а також в інтервалі кожну секунду. якщо я тут викликаю функцію то не оновлюється delta
+		if (delta <= 0) {
+			clearInterval(id);
+			return;
+		}
+		const timeObj = convertMs(delta);
+		render(timeObj);
+		delta -= 1000;
 	}, 1000);
 };
 
@@ -58,7 +64,6 @@ function onClickIntervalHelper(delta) {
 			clearInterval(id);
 			return;
 		}
-
 	const timeObj = convertMs(delta);
 	render(timeObj);
 	delta -= 1000;
