@@ -1,6 +1,8 @@
 import flatpickr from "flatpickr";
 import "flatpickr/dist/flatpickr.min.css";
 
+import { Notify } from 'notiflix/build/notiflix-notify-aio';
+
 const refs = {
   inputRef: document.querySelector('input#datetime-picker'),
 	startBtnRef: document.querySelector('button[data-start]'),
@@ -10,6 +12,8 @@ const refs = {
 	minutesSpan: document.querySelector('span[data-minutes]'),
 	secondsSpan: document.querySelector('span[data-seconds]'),
 };
+
+let diff = 0;
 
 // initial state of the start button
 refs.startBtnRef.disabled = true;
@@ -21,53 +25,45 @@ const options = {
   minuteIncrement: 1,
   onClose(selectedDates) {
 		
-		// ?? як отримати доступ до властивості defaultDate через ключове слово this ??
 		if (selectedDates[0].valueOf() < options.defaultDate.valueOf()) {
 			refs.startBtnRef.disabled = true;
-			alert("Please choose a date in the future");
+			Notify.failure("Please choose a date in the future");
 			return;
 		}
 
 		refs.startBtnRef.disabled = false;
 
-		let delta = selectedDates[0].valueOf() - options.defaultDate.valueOf();
-
-		// ?? як правильно передати значення параметра delta в колбек, для того щоб після натискання на кнопку, зняти з неї слухач ?? ПРОМІСИ ??
-		refs.startBtnRef.addEventListener('click', () => onClick(delta));
-
+		diff = selectedDates[0].valueOf() - options.defaultDate.valueOf();
   },
 };
 
 flatpickr(refs.inputRef, options);
 
-function onClick(delta) {
+refs.startBtnRef.addEventListener('click', onClick);
+
+function onClick() {
+
 	refs.startBtnRef.disabled = true;
 
-	// Виконую розрахунок та відмалювання відразу після кліку...
-	onClickIntervalHelper(delta);
+	if (diff <= 0) {
+			clearInterval(id);
+			return;
+		}
+		const timeObj = convertMs(diff);
+		render(timeObj);
+		diff -= 1000;
 
 	const id = setInterval(() => {
-		// .. а також в інтервалі кожну секунду. якщо я тут викликаю функцію то не оновлюється delta
-		if (delta <= 0) {
+
+		if (diff <= 0) {
 			clearInterval(id);
 			return;
 		}
-		const timeObj = convertMs(delta);
+		const timeObj = convertMs(diff);
 		render(timeObj);
-		delta -= 1000;
+		diff -= 1000;
 	}, 1000);
 };
-
-// ця логіка потрібра в функції onClick вдічі, тому винесена в окрему функцію. 
-function onClickIntervalHelper(delta) {
-	if (delta <= 0) {
-			clearInterval(id);
-			return;
-		}
-	const timeObj = convertMs(delta);
-	render(timeObj);
-	delta -= 1000;
-}
 
 function render({ days, hours, minutes, seconds }) {
 	refs.daysSpan.innerHTML = addLeadingZero(days);
