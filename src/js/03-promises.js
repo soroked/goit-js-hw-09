@@ -22,10 +22,6 @@ function handleSubmit(e) {
 
     let delay = Number(delayRef) + Number((id - 1) * stepRef);
 
-    console.log(delayRef);
-    console.log(stepRef);
-    console.log(delay);
-
     createPromise(id, delay)
       .then(({position, delay}) => Notify.success(`✅ Fulfilled promise ${position} in ${delay}ms`))
       .catch(({position, delay}) => Notify.failure(`❌ Rejected promise ${position} in ${delay}ms`));
@@ -39,10 +35,6 @@ function handleSubmit(e) {
       }
 
       let delay = Number(delayRef) + Number((id - 1) * stepRef);
-
-      console.log(delayRef);
-      console.log(stepRef);
-      console.log(delay);
 
       createPromise(id, delay)
         .then(({position, delay}) => Notify.success(`✅ Fulfilled promise ${position} in ${delay}ms`))
